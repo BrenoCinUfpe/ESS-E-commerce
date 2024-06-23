@@ -93,6 +93,7 @@ model Product {
   deletedAt     DateTime?      @db.Timestamptz(3)
   categoryId    Int            @db.Integer
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  description   String         @db.Text    
   orderProducts OrderProduct[]
   productMedia  ProductMedia[]
 
@@ -111,6 +112,7 @@ model Category {
 
   @@map("TB_CATEGORY")
 }
+
 
 model ProductMedia {
   id        Int     @id @default(autoincrement())

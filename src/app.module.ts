@@ -14,9 +14,11 @@ import { AtGuard } from './auth/guards';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AllExceptionsFilter } from './middlewares/exception.filter';
-import { EmailModule } from './modules/email/email.module';
-import { UserModule } from './modules/user/user.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { EmailModule } from './modules/email/email.module';
+import { ProductController } from './modules/itens/itens.controller';
+import { ProductModule } from './modules/itens/itens.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   providers: [
@@ -45,7 +47,9 @@ import { CategoriesModule } from './modules/categories/categories.module';
     UserModule,
     EmailModule,
     CategoriesModule,
+    ProductModule,
   ],
+  controllers: [ProductController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {}

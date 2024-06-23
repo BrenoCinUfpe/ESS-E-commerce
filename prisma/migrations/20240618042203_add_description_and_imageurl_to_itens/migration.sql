@@ -1,0 +1,15 @@
+-- CreateTable
+CREATE TABLE "TB_ITENS" (
+    "id" SERIAL NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "stock" INTEGER NOT NULL DEFAULT 0,
+    "categoryId" INTEGER NOT NULL,
+    "description" TEXT NOT NULL,
+    "imageUrl" VARCHAR(255) NOT NULL,
+
+    CONSTRAINT "TB_ITENS_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "TB_ITENS" ADD CONSTRAINT "TB_ITENS_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "TB_CATEGORY"("id") ON DELETE CASCADE ON UPDATE CASCADE;
