@@ -168,3 +168,14 @@ Feature: User Service
     And o usuário enviou na senha o valor "Senha@8858"
     When o usuário clica em “Trocar senha”
     Then a senha do usuário atrelado a token de recuperação é modificada
+
+  Scenario: O usuário solicita a lista de pedidos
+    Given que existe um usuário com o ID "1" e email "cliente123@gmail.com" com status "ACTIVE"
+    When o usuário solicita a lista de pedidos
+    Then o sistema deve retornar sua lista de pedidos
+
+  Scenario: O administrador solicita a lista de pedidos de outro usuário
+    Given que existe um administrador no sistema
+    And que existe um usuário com o ID "1" e email "cliente123@gmail.com" com status "ACTIVE"
+    When o administrador solicita a lista de pedidos desse usuário
+    Then o sistema deve retornar a lista de pedidos do usuário

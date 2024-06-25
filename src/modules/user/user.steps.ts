@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RoleEnum, StatusEnum } from '@prisma/client';
+import { OrderStatus, RoleEnum, StatusEnum } from '@prisma/client';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { any, anyObject, anyString } from 'jest-mock-extended';
 import { AuthRepository } from 'src/auth/auth.repository';
@@ -62,6 +62,7 @@ defineFeature(feature, test => {
             findByEmail: jest.fn(),
             updateUserPassword: jest.fn(),
             updateUserPersonalData: jest.fn(),
+            getOrders: jest.fn(),
           }),
         },
         {
@@ -1434,5 +1435,148 @@ defineFeature(feature, test => {
         );
       },
     );
+  });
+
+  //--------------------------
+
+  test('O usuário solicita a lista de pedidos', ({
+    given,
+    when,
+    then,
+    and,
+  }) => {
+    let userId: number;
+    let email: string;
+    let result: any;
+
+    given(
+      /^que existe um usuário com o ID "(.*)" e email "(.*)" com status "(.*)"$/,
+      async (id, userEmail) => {
+        userId = parseInt(id, 10);
+        email = userEmail;
+        const userToUpdate: UserEntity = {
+          id: userId,
+          name: 'cliente cadastro',
+          email: userEmail,
+          password: await hashData('mockValue'),
+          refreshToken: null,
+          recoveryPasswordToken: '',
+          deletedAt: null,
+          createdAt: new Date(),
+          updatedAt: null,
+          status: StatusEnum.ACTIVE,
+          Media: null,
+          mediaId: null,
+          role: RoleEnum.CUSTOMER,
+        };
+
+        userRepositoryMock.findByEmail.mockResolvedValue(userToUpdate);
+        userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        userRepositoryMock.deleteAsync.mockResolvedValue(Promise.resolve());
+        userRepositoryMock.findByIdAsync.mockResolvedValue(userToUpdate);
+        userRepositoryMock.getOrders.mockResolvedValue([
+          {
+            id: 1,
+            userId: userId,
+            total: 100,
+            status: OrderStatus.PROCESSING,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ] as any);
+      },
+    );
+
+    when('o usuário solicita a lista de pedidos', async () => {
+      result = await userService.fetchOrders(
+        email,
+        RoleEnum.CUSTOMER,
+        email,
+        userId,
+      );
+    });
+
+    then('o sistema deve retornar sua lista de pedidos', () => {
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0]).toHaveProperty('id');
+      expect(result[0]).toHaveProperty('userId', userId);
+      expect(result[0]).toHaveProperty('total');
+    });
+  });
+
+  //----------
+
+  test('O administrador solicita a lista de pedidos de outro usuário', ({
+    given,
+    when,
+    then,
+    and,
+  }) => {
+    let userId: number;
+    let email: string;
+    let result: any;
+
+    given('que existe um administrador no sistema', async () => {
+      userRepositoryMock.exists({ role: RoleEnum.ADMIN });
+    });
+
+    and(
+      /^que existe um usuário com o ID "(.*)" e email "(.*)" com status "(.*)"$/,
+      async (id, userEmail) => {
+        userId = parseInt(id, 10);
+        email = userEmail;
+        const userToUpdate: UserEntity = {
+          id: userId,
+          name: 'cliente cadastro',
+          email: userEmail,
+          password: await hashData('mockValue'),
+          refreshToken: null,
+          recoveryPasswordToken: '',
+          deletedAt: null,
+          createdAt: new Date(),
+          updatedAt: null,
+          status: StatusEnum.ACTIVE,
+          Media: null,
+          mediaId: null,
+          role: RoleEnum.CUSTOMER,
+        };
+
+        userRepositoryMock.findByEmail.mockResolvedValue(userToUpdate);
+        userRepositoryMock.exists.mockResolvedValue(Promise.resolve(true));
+        userRepositoryMock.deleteAsync.mockResolvedValue(Promise.resolve());
+        userRepositoryMock.findByIdAsync.mockResolvedValue(userToUpdate);
+        userRepositoryMock.getOrders.mockResolvedValue([
+          {
+            id: 1,
+            userId: userId,
+            total: 100,
+            status: OrderStatus.PROCESSING,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ] as any);
+      },
+    );
+
+    when(
+      'o administrador solicita a lista de pedidos desse usuário',
+      async () => {
+        result = await userService.fetchOrders(
+          'admin@gmail.com',
+          RoleEnum.ADMIN,
+          email,
+          userId,
+        );
+      },
+    );
+
+    then('o sistema deve retornar a lista de pedidos do usuário', () => {
+      expect(result).toBeInstanceOf(Array);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0]).toHaveProperty('id');
+      expect(result[0]).toHaveProperty('userId', userId);
+      expect(result[0]).toHaveProperty('total');
+    });
   });
 });

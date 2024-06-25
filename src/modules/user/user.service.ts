@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, RoleEnum, StatusEnum } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UserRegisteredResponse } from 'src/auth/dto/response/UserToken';
 import { UserPayload } from 'src/auth/models/UserPayload';
 import { DefaultFilter } from 'src/filters/DefaultFilter';
 import { CrudType } from 'src/utils/base/ICrudTypeMap';
@@ -276,6 +277,21 @@ export class UserService {
       this.logger.debug(`User personal data updated`);
     } catch (error) {
       handleError(error);
+    }
+  }
+
+  async fetchOrders(
+    email: string,
+    role: string,
+    targetEmail: string,
+    userId: number,
+  ) {
+    const targetUser = await this.userRepository.findByEmail(targetEmail);
+
+    if (email == targetEmail || role === RoleEnum.ADMIN) {
+      return await this.userRepository.getOrders(targetUser.id);
+    } else {
+      return [];
     }
   }
 }

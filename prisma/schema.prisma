@@ -24,20 +24,21 @@ enum OrderStatus {
 }
 
 model User {
-  id                    Int        @id @default(autoincrement())
-  name                  String     @db.VarChar(255)
-  email                 String     @unique
-  password              String     @db.VarChar(255)
-  refreshToken          String?    @db.VarChar(255)
-  recoveryPasswordToken String?    @db.VarChar(255)
-  deletedAt             DateTime?  @db.Timestamptz(3)
-  createdAt             DateTime   @default(now()) @db.Timestamptz(3)
-  updatedAt             DateTime   @updatedAt @db.Timestamptz(3)
-  status                StatusEnum @default(ACTIVE)
-  mediaId               Int?       @db.Integer
+  id                    Int           @id @default(autoincrement())
+  name                  String        @db.VarChar(255)
+  email                 String        @unique
+  password              String        @db.VarChar(255)
+  refreshToken          String?       @db.VarChar(255)
+  recoveryPasswordToken String?       @db.VarChar(255)
+  deletedAt             DateTime?     @db.Timestamptz(3)
+  createdAt             DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime      @updatedAt @db.Timestamptz(3)
+  status                StatusEnum    @default(ACTIVE)
+  mediaId               Int?          @db.Integer
   role                  RoleEnum
-  Media                 Media?     @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  Media                 Media?        @relation(fields: [mediaId], references: [id], onDelete: SetNull)
   orders                Order[]
+  CartProduct           CartProduct[]
 
   @@map("TB_USER")
 }
@@ -95,6 +96,7 @@ model Product {
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderProducts OrderProduct[]
   productMedia  ProductMedia[]
+  CartProduct   CartProduct[]
 
   @@map("TB_PRODUCT")
 }
@@ -130,4 +132,29 @@ model Media {
   productMedia ProductMedia[]
 
   @@map("TB_MEDIA")
+}
+
+model Cart {
+  id       Int           @id @default(autoincrement())
+  userId   Int           @unique
+  locked   Boolean       @db.Boolean
+  products CartProduct[]
+
+  @@map("TB_CART")
+}
+
+model CartProduct {
+  cartId Int  @db.Integer
+  cart   Cart @relation(fields: [cartId], references: [id])
+
+  productId Int @db.Integer
+
+  userId Int @db.Integer
+
+  quantity Int     @db.Integer
+  User     User    @relation(fields: [userId], references: [id])
+  Product  Product @relation(fields: [productId], references: [id])
+
+  @@id([cartId, productId])
+  @@map("TB_CART_PRODUCT")
 }

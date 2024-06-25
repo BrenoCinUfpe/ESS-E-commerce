@@ -8,6 +8,7 @@ import {
   Res,
   HttpStatus,
   Patch,
+  Post,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -124,5 +125,19 @@ export class UserController {
     await this.service.deleteAsync(currentUser.id);
 
     return response.status(HttpStatus.OK).send();
+  }
+
+  @Get('orders')
+  @ApiOperation({ summary: 'Listar pedidos de um usuário' })
+  async searchOrders(
+    @AuthenticatedUser() currentUser: UserPayload,
+    @Query('targetEmail') targetEmail: string,
+  ) {
+    return this.service.fetchOrders(
+      currentUser.email,
+      currentUser.role,
+      targetEmail,
+      currentUser.id,
+    );
   }
 }

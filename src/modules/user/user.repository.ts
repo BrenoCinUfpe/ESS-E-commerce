@@ -161,4 +161,11 @@ export class UserRepository {
       },
     });
   }
+
+  async getOrders(userId: number) {
+    const orders = await this.prisma.order.findMany({
+      where: { userId: userId },
+    });
+    return orders;
+  }
 }

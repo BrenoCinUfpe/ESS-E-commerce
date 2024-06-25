@@ -21,6 +21,8 @@ import { DeliveryModule } from './modules/delivery/delivery.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { UserModule } from './modules/user/user.module';
+import { CartModule } from './modules/cart/cart.module';
+
 
 @Module({
   providers: [
@@ -56,6 +58,7 @@ import { UserModule } from './modules/user/user.module';
     CategoriesModule,
     OrdersModule,
     DeliveryModule,
+    CartModule,
   ],
 })
 export class AppModule implements NestModule {

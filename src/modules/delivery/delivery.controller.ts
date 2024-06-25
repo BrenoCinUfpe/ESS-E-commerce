@@ -1,8 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { CorreiosService } from './delivery.service';
 
 @Controller('correios')
+@ApiBearerAuth()
+@ApiTags('Correios')
 export class CorreiosController {
   constructor(private readonly correiosService: CorreiosService) {}
 

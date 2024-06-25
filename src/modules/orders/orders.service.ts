@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -32,5 +33,22 @@ export class OrdersService {
     );
 
     return order;
+  }
+
+  async cancelOrder(id: number) {
+    if (!id) {
+      throw new BadRequestException('Id não enviado');
+    }
+
+    await this.prisma.order.update({
+      where: {
+        id,
+      },
+      data: {
+        status: OrderStatus.CANCELED,
+      },
+    });
+
+    return id;
   }
 }
